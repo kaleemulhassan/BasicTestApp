@@ -17,6 +17,7 @@ namespace BasicTestApp.Controllers
     {
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
+        private ApplicationDbContext db = new ApplicationDbContext();
 
         public AccountController()
         {
@@ -79,7 +80,11 @@ namespace BasicTestApp.Controllers
             switch (result)
             {
                 case SignInStatus.Success:
-                    return RedirectToLocal(returnUrl);
+                    {
+                        if (HttpContext.User.IsInRole("Admin"))
+                            return RedirectToLocal("/admin/profiles/index");
+                        return RedirectToLocal(returnUrl);
+                    }
                 case SignInStatus.LockedOut:
                     return View("Lockout");
                 case SignInStatus.RequiresVerification:
@@ -155,15 +160,20 @@ namespace BasicTestApp.Controllers
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
-                    
-                    // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
+                    var RoleResult = await UserManager.AddToRoleAsync(user.Id, "User");
+                    if (RoleResult.Succeeded)
+                    {
+                        db.Profiles.Add(new Profile() { UserID = user.Id, DOB=DateTime.Now });
+                        db.SaveChanges();
+                    }
+                    await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);                    
+                  
                     // Send an email with this link
                     // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
                     // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
                     // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
 
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Details", "Profiles");
                 }
                 AddErrors(result);
             }
@@ -392,7 +402,7 @@ namespace BasicTestApp.Controllers
         public ActionResult LogOff()
         {
             AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Login", "Account");
         }
 
         //
@@ -449,7 +459,7 @@ namespace BasicTestApp.Controllers
             {
                 return Redirect(returnUrl);
             }
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Details", "Profiles");
         }
 
         internal class ChallengeResult : HttpUnauthorizedResult
