@@ -16,13 +16,13 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                @Html.ActionLink("Admin Panel", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+                @Html.ActionLink("Admin Panel", "Index", "Profiles", new { area = "admin" }, new { @class = "navbar-brand" })
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li><a href="/admin/manageuser/index">Manage User</a></li>
-                    <li><a href="/admin/profiles/index">Update Profile</a></li>
+                    <li><a href="/admin/profiles/index">Manage User</a></li>
                 </ul>
+                @Html.Partial("_LoginPartial")
             </div>
         </div>
     </div>

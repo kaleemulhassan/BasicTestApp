@@ -18,17 +18,17 @@ namespace BasicTestApp.Areas.admin.Controllers
         // GET: admin/Profiles
         public ActionResult Index()
         {
-            return View(db.Profiles.ToList());
+            return View(db.Users.ToList());
         }
 
         // GET: admin/Profiles/Details/5
-        public ActionResult Details(int? id)
+        public ActionResult Details(string id="")
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Profile profile = db.Profiles.Find(id);
+            ApplicationUser profile = db.Users.Find(id);
             if (profile == null)
             {
                 return HttpNotFound();
@@ -36,37 +36,15 @@ namespace BasicTestApp.Areas.admin.Controllers
             return View(profile);
         }
 
-        // GET: admin/Profiles/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: admin/Profiles/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ID,FullName,Address,Gender,DOB,UserID")] Profile profile)
-        {
-            if (ModelState.IsValid)
-            {
-                db.Profiles.Add(profile);
-                db.SaveChanges();
-                return RedirectToAction("Index");
-            }
-
-            return View(profile);
-        }
 
         // GET: admin/Profiles/Edit/5
-        public ActionResult Edit(int? id)
+        public ActionResult Edit(string id="")
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Profile profile = db.Profiles.Find(id);
+            ApplicationUser profile = db.Users.Find(id);
             if (profile == null)
             {
                 return HttpNotFound();
@@ -79,39 +57,46 @@ namespace BasicTestApp.Areas.admin.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ID,FullName,Address,Gender,DOB,UserID")] Profile profile)
+        public ActionResult Edit([Bind(Include = "ID,FullName,Address,Gender,DOB,LockoutEnabled")] ApplicationUser paraApplicationUser)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(profile).State = EntityState.Modified;
+                ApplicationUser appUser=db.Users.Find(paraApplicationUser.Id);
+                appUser.FullName = paraApplicationUser.FullName;
+                appUser.Address = paraApplicationUser.Address;
+                appUser.Gender = paraApplicationUser.Gender;
+                appUser.DOB = paraApplicationUser.DOB;
+                appUser.LockoutEnabled = paraApplicationUser.LockoutEnabled;
+                
+                db.Entry(appUser).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            return View(profile);
+            return View(paraApplicationUser);
         }
 
         // GET: admin/Profiles/Delete/5
-        public ActionResult Delete(int? id)
+        public ActionResult Delete(string id="")
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Profile profile = db.Profiles.Find(id);
-            if (profile == null)
+            ApplicationUser appUser= db.Users.Find(id);
+            if (appUser == null)
             {
                 return HttpNotFound();
             }
-            return View(profile);
+            return View(appUser);
         }
 
         // POST: admin/Profiles/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
+        public ActionResult DeleteConfirmed(string id)
         {
-            Profile profile = db.Profiles.Find(id);
-            db.Profiles.Remove(profile);
+            ApplicationUser profile = db.Users.Find(id);
+            db.Users.Remove(profile);
             db.SaveChanges();
             return RedirectToAction("Index");
         }

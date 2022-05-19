@@ -1,4 +1,4 @@
-﻿@model BasicTestApp.Models.Profile
+﻿@model BasicTestApp.Models.ApplicationUser
 
 @{
     ViewBag.Title = "Details";
@@ -42,11 +42,24 @@
             @Html.DisplayFor(model => model.DOB)
         </dd>
 
-        
+        <dt>
+            @Html.DisplayNameFor(model => model.Email)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Email)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.IsActive)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IsActive)
+        </dd>
 
     </dl>
 </div>
 <p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.ID }) |
-    @Html.ActionLink("Back to List", "Index")
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }, new { @class="btn btn-success"}) |
+    @Html.ActionLink("Back to List", "Index", new { @class = "btn btn-default" })
 </p>

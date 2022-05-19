@@ -6,7 +6,7 @@ using System.Web;
 
 namespace BasicTestApp.Models
 {
-    public class Profile
+    public class ModelProfile
     {
         [Key]
         public int ID { get; set; }

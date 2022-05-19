@@ -58,6 +58,17 @@ namespace BasicTestApp.Controllers
         [AllowAnonymous]
         public ActionResult Login(string returnUrl)
         {
+            if (HttpContext.User.Identity.GetUserId() != null) 
+            {
+                if (HttpContext.User.IsInRole("Admin"))
+                {
+                    return RedirectToAction("Index", "Profiles", new { area = "admin" });
+                }
+                else
+                {
+                    return RedirectToAction("Index", "Profile");
+                }
+            }
             ViewBag.ReturnUrl = returnUrl;
             return View();
         }
@@ -81,9 +92,24 @@ namespace BasicTestApp.Controllers
             {
                 case SignInStatus.Success:
                     {
-                        if (HttpContext.User.IsInRole("Admin"))
+                        ApplicationUser appUser = UserManager.FindByEmail(model.Email);
+                        if (appUser.IsActive == false) 
+                        {
+                            ModelState.AddModelError("", "Account is blocked.");
+                            return View(model);
+                        }
+                        //check admin
+                      bool hasRole =appUser.Roles.Any(x =>x.RoleId == "dcaabd0c-1e0d-4172-9689-e1c7c54d109f");
+                        if (hasRole)
+                        {
+                            returnUrl = "/admin/profiles/index";
                             return RedirectToLocal("/admin/profiles/index");
-                        return RedirectToLocal(returnUrl);
+                        }
+                        else
+                        {
+                            returnUrl = "/profile/index";
+                            return RedirectToLocal(returnUrl);
+                        }
                     }
                 case SignInStatus.LockedOut:
                     return View("Lockout");
@@ -156,16 +182,11 @@ namespace BasicTestApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                var user = new ApplicationUser { UserName = model.Email, Email = model.Email,IsActive= true };
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    var RoleResult = await UserManager.AddToRoleAsync(user.Id, "User");
-                    if (RoleResult.Succeeded)
-                    {
-                        db.Profiles.Add(new Profile() { UserID = user.Id, DOB=DateTime.Now });
-                        db.SaveChanges();
-                    }
+                    var RoleResult = await UserManager.AddToRoleAsync(user.Id, "User");                    
                     await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);                    
                   
                     // Send an email with this link
@@ -173,7 +194,7 @@ namespace BasicTestApp.Controllers
                     // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
                     // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
 
-                    return RedirectToAction("Details", "Profiles");
+                    return RedirectToAction("Index", "Profile");
                 }
                 AddErrors(result);
             }
@@ -459,7 +480,7 @@ namespace BasicTestApp.Controllers
             {
                 return Redirect(returnUrl);
             }
-            return RedirectToAction("Details", "Profiles");
+            return RedirectToAction("Index", "Profile");
         }
 
         internal class ChallengeResult : HttpUnauthorizedResult

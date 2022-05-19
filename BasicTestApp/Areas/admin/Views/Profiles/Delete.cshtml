@@ -1,4 +1,4 @@
-﻿@model BasicTestApp.Models.Profile
+﻿@model BasicTestApp.Models.ApplicationUser
 
 @{
     ViewBag.Title = "Delete";
@@ -44,11 +44,11 @@
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.UserID)
+            @Html.DisplayNameFor(model => model.Email)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.UserID)
+            @Html.DisplayFor(model => model.Email)
         </dd>
 
     </dl>
