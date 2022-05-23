@@ -7,6 +7,8 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using BasicTestApp.Models;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace BasicTestApp.Areas.admin.Controllers
 {
@@ -96,6 +98,12 @@ namespace BasicTestApp.Areas.admin.Controllers
         public ActionResult DeleteConfirmed(string id)
         {
             ApplicationUser profile = db.Users.Find(id);
+            IdentityRole objRole=db.Roles.FirstOrDefault(x => x.Name == "Admin");
+            if (profile.Roles.Any(x => x.RoleId == objRole.Id)) 
+            {
+                ModelState.AddModelError(string.Empty,"Admin cannot be deleted.");
+                return View("Delete", profile);
+            }
             db.Users.Remove(profile);
             db.SaveChanges();
             return RedirectToAction("Index");
